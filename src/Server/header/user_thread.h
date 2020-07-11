@@ -6,12 +6,19 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
+#include <sys/socket.h>
 
-pthread_t user_thread;
-int socketConnect;
+struct user_t {
+    pthread_t *thread;
+    // const char* username;
+    int sock;
+};
 
+void closeIO(struct user_t userN);
 void *newConnection(void *ptr);
 void newThread(int socket);
-
+long long retrieveTime();
+pthread_t *allocateThread();
 
 #endif

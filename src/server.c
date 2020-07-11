@@ -7,15 +7,10 @@
 #include <stdbool.h>
 #include "Server/header/user_thread.h"
 
-int main(int argc, const char *argv[]) 
-{ 
-    int server_fd;
-    int socket_n;
-    // int valread;
-    // char buffer[1024] = {0};
+int main(int argc, const char *argv[]) {
 
+    int server_fd, opt;
     struct sockaddr_in address;
-    int opt = 1;
     int addrlen = sizeof(address);     
 
     printf("Creating socket...\n");
@@ -31,10 +26,11 @@ int main(int argc, const char *argv[])
     bind(server_fd, (struct sockaddr *)&address, sizeof(address));
 
     printf("Awaiting connections...\n");
-    listen(server_fd, 2);
+    listen(server_fd, 10);
 
     while(true) {
-        newThread(accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen));
+        int connection = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+        newThread(connection);    
     }
 
     return 0;    
