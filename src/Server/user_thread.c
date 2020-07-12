@@ -7,11 +7,9 @@ void *newConnection(void *ptr) {
     int valread;
     struct user_t userN = *(struct user_t *)ptr;
     char buffer[1024] = {0};
-
     while(true) {
-        
         valread = read(userN.sock, buffer, 1024);
-        if(valread > 0) printf("%s\n", buffer);
+        if(valread > 0) printf("%s: %s\n", userN.username, buffer);
         else break;
     }
     closeIO(userN);
@@ -22,18 +20,18 @@ void closeIO(struct user_t userN) {
     pthread_mutex_lock(&incrementLock); 
     currentUsers--;
     pthread_mutex_unlock(&incrementLock);
-
+    printf("%s has exited...\n", userN.username);
     close(userN.sock);
     free(userN.thread);
-    printf("\nUSER has exited...\n");
-    fflush(stdout);
+
 }
 
-void newThread(int socket) {
+void create_thread(int socket, char *name) {
     currentUsers++;
     struct user_t newUser;
     newUser.thread = allocateThread();
     newUser.sock = socket;
+    newUser.username = name;
     pthread_create(newUser.thread, NULL, newConnection, &newUser);
     printf("\nUsers: %d\n", currentUsers);
 

@@ -11,13 +11,13 @@
 
 struct user_t {
     pthread_t *thread;
-    // const char* username;
+    char* username;
     int sock;
 };
 
 void closeIO(struct user_t userN);
 void *newConnection(void *ptr);
-void newThread(int socket);
+void create_thread(int socket, char *name);
 long long retrieveTime();
 pthread_t *allocateThread();
 
