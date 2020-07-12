@@ -1,21 +1,90 @@
 #include "linked_list.h"
 
-bool *enqueue(node_t *list, int connection, char *username) {
+bool enqueue(node_t** list, int connection, char *username) {
+
+    if(doesExist(list, username)) return false;
+
+    node_t *node = malloc(sizeof(node_t));
+    node->username = username;
+    node->connection = connection;
+    node->next = *list;
+    *list = node;
+    return true;
+}
+
+node_t *dequeue(node_t** list, char *username) {
+    if(*list == NULL) return NULL;
+
+    node_t *node = (*list);
+    node_t *prev = NULL;
+
+    while(node != NULL) {
+        if(strcmp(node->username, username) == 0) {
+            prev->next = node->next;
+            return node;
+        } 
+        prev = node;
+        node = node->next;
+
+    }
+
+    *list = (*list)->next;
+
+    return NULL;
 
 }
 
-node_t *dequeue(node_t *list, int connection, char *username) {
+bool doesExist(node_t **list, char *username) {
+    if(list == NULL) return false;
+
+    node_t *node = *list;
+
+    while(node != NULL) {
+        if(strcmp(node->username, username) == 0) return true;
+        node = node->next;
+    }
+
+    return false;
 
 }
 
-bool doesExist(node_t *list, char *username) {
+void clear(node_t** list) {
+    if(*list == NULL) return;
+
+    node_t *node = *list;
+
+    while(node != NULL) {
+        *list = (*list)->next;
+        free(node);
+        node = *list;
+    }
 
 }
 
-void clear(node_t *list) {
+int size(node_t** list) {
+    if(*list == NULL) return 0;
 
+    node_t *node = *list;
+    int counter = 0;
+
+    while(node != NULL) {
+        node = node->next;
+        counter++;
+    }
+
+    return counter;
 }
 
-int size(node_t *list) {
-    
+void printList(node_t** list) {
+    if(*list == NULL) {
+        printf("Linked list is empty\n");
+        return;
+    }
+
+    node_t *node = *list;
+
+    while(node != NULL) {
+        printf("username: %s, Connection: %d\n", node->username, node->connection);
+        node = node->next;
+    }
 }
