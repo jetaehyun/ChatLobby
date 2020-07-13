@@ -32,7 +32,13 @@ int main(int argc, const char* argv[]) {
     dequeue(&node, "Ted");
     puts("");
     printList(&node);
+    puts("-------------------------------------------\n"); 
+
+    puts("-----------------CLEAR-------------------");
+    clear(&node);
+    printf("SIZE: %d\n", size(&node));
     puts("-------------------------------------------\n");    
+       
 
     return 0;
 }

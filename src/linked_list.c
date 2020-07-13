@@ -1,5 +1,10 @@
 #include "linked_list.h"
 
+/*
+    Linked List implementation for server messages
+*/
+
+
 bool enqueue(node_t** list, int connection, char *username) {
 
     if(doesExist(list, username)) return false;
@@ -7,7 +12,10 @@ bool enqueue(node_t** list, int connection, char *username) {
     node_t *node = malloc(sizeof(node_t));
     node->username = username;
     node->connection = connection;
-    node->next = *list;
+
+    if(list == NULL) node->next = NULL;
+    else             node->next = *list;
+
     *list = node;
     return true;
 }
@@ -31,7 +39,6 @@ node_t *dequeue(node_t** list, char *username) {
     *list = (*list)->next;
 
     return NULL;
-
 }
 
 bool doesExist(node_t **list, char *username) {
@@ -45,7 +52,6 @@ bool doesExist(node_t **list, char *username) {
     }
 
     return false;
-
 }
 
 void clear(node_t** list) {
@@ -58,7 +64,6 @@ void clear(node_t** list) {
         free(node);
         node = *list;
     }
-
 }
 
 int size(node_t** list) {

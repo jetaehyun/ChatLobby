@@ -9,6 +9,7 @@ INC_FLAGS = -I/Server/header
 SOURCES1 = \
 	server.c\
 	user_thread.c\
+	linked_list.c\
 
 SOURCES2 = \
 	client.c\

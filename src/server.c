@@ -7,13 +7,14 @@
 #include <string.h>
 #include <stdbool.h>
 #include "Server/header/user_thread.h"
+#include "linked_list.h"
 
 int main(int argc, const char *argv[]) {
+    node_t *node = NULL;
 
     int server_fd, opt;
     struct sockaddr_in address;
     int addrlen = sizeof(address);     
-    char username[50];
 
     printf("Creating socket...\n");
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -33,9 +34,17 @@ int main(int argc, const char *argv[]) {
 
     while(true) {
         int connection = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+        char *username = malloc(sizeof(username));
         read(connection, username, sizeof(username));
         strtok(username, "\n");
-        create_thread(connection, username);    
+
+        if(doesExist(&node, username)) { // Check if user is in list
+            send(connection, "deny", 5, 0);
+            close(connection);
+        } else {
+            send(connection, "accept", 6, 0);
+            create_thread(connection, username, &node);    
+        }
     }
 
     return 0;    
