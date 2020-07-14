@@ -6,8 +6,10 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <stdbool.h>
-#include "Server/header/user_thread.h"
+#include "Server/header/connection_thread.h"
 #include "linked_list.h"
+
+#define datLen 1024
 
 int main(int argc, const char *argv[]) {
     node_t *node = NULL;
@@ -42,7 +44,8 @@ int main(int argc, const char *argv[]) {
             send(connection, "deny", 5, 0);
             close(connection);
         } else {
-            send(connection, "accept", 6, 0);
+            send(connection, "accept", 7, 0);
+            printf("Authorizing: %s\n", username);
             create_thread(connection, username, &node);    
         }
     }

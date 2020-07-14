@@ -6,6 +6,7 @@
 #include <string.h> 
 #include <stdbool.h>
 #include <signal.h>
+#include "Client/header/read_thread.h"
 
 /**
  * @brief shorturl.at/dsN48
@@ -23,7 +24,7 @@ char* username() {
     size_t s = sizeof(name);
     printf("Enter your name: ");
     getline(&name, &s, stdin);
-    printf("\nEntering lobby as: %s\n", name);
+    printf("Entering lobby as: %s\n", name);
     return name;
 }
 
@@ -39,7 +40,7 @@ int main(int argc, const char *argv[]) {
     serv_addr.sin_port = htons(8800);
     serv_addr.sin_addr.s_addr = inet_addr("192.168.0.156"); 
 
-   char *name = username();
+    char *name = username();
 
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) { 
         printf("Connection Failed \n"); 
@@ -50,19 +51,24 @@ int main(int argc, const char *argv[]) {
 
     char *message = malloc(sizeof(char) * 1024);
     size_t msgSize = sizeof(message);
+    pthread_t *thr = NULL;
+
     while(true) {
-        read(sock, message, msgSize);
+        recv(sock, message, msgSize, 0);
         if(strcmp(message, "deny") == 0) {
             printf("User already exists, try again...\n");
             auth = false;
             break;
         } else if(strcmp(message, "accept") == 0) {
-            printf("Entering Lobby...\n");
+            thr = allocateThread();
+            create_thread(sock, thr);
             break;
         }
 
     }
-
+    
+    fflush(stdout);
+    
     while(auth) {
         // for now
         if(!feof(stdin)) {
@@ -75,6 +81,7 @@ int main(int argc, const char *argv[]) {
 
     printf("\nEXITED CHAT\n");
     free(name);
+    free(thr);
     free(message);
     close(sock);
 

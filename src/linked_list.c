@@ -29,6 +29,7 @@ node_t *dequeue(node_t** list, char *username) {
     while(node != NULL) {
         if(strcmp(node->username, username) == 0) {
             prev->next = node->next;
+            free(node);
             return node;
         } 
         prev = node;

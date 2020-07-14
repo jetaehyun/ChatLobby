@@ -1,5 +1,5 @@
-#ifndef USER_THREAD_H
-#define USER_THREAD_H
+#ifndef CONNECTION_THREAD_H
+#define CONNECTION_THREAD_H
 
 #include <unistd.h> 
 #include <pthread.h>
@@ -17,6 +17,7 @@ struct user_t {
     node_t **node;
 };
 
+void sendData(struct user_t userData, char *buffer);
 void closeIO(struct user_t userN);
 void *newConnection(void *ptr);
 void create_thread(int socket, char *name, node_t **nodeT);

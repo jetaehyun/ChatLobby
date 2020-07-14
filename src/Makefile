@@ -4,15 +4,16 @@ build_dir = .build
 CC = gcc
 CFLAGS = -g -Wall
 LDFLAGS = -lpthread -pthread
-INC_FLAGS = -I/Server/header
+# INC_FLAGS = -I/Server/header
 
 SOURCES1 = \
 	server.c\
-	user_thread.c\
+	connection_thread.c\
 	linked_list.c\
 
 SOURCES2 = \
 	client.c\
+	read_thread.c\
 
 OBJECTS1 = $(addprefix $(build_dir)/,$(SOURCES1:.c=.o)) 
 OBJECTS2 = $(addprefix $(build_dir)/,$(SOURCES2:.c=.o)) 
@@ -39,3 +40,4 @@ clean:
 
 VPATH = \
 	Server\
+	Client\
