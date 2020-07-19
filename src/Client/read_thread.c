@@ -4,16 +4,18 @@ pthread_t threadT;
 
 void *newConnection(void *ptr) {
     int socket = *(int *)ptr;
-    int data;
+    int data = 0;
 
-    char buffer[1024] = {0};
+    char buffer[1024] = {'\0'};
     while(true) {
         data = recv(socket, buffer, 1024, 0);
         // printf("%d\n", data);
         if(data > 0) {
+
             buffer[strlen(buffer)] = '\0'; 
             printf("%s\n", buffer);
-        } else break;
+
+        } else if(data < 0) break;
 
         usleep(500000);
     }

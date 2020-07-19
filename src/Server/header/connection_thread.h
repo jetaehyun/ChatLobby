@@ -22,6 +22,7 @@ void alertStatus(bool isOnline, struct user_t userData);
 void closeIO(struct user_t userData);
 void *newConnection(void *ptr);
 void create_thread(int socket, char *username, node_t **nodeT);
+long long getTime();
 pthread_t *allocateThread();
 
 #endif

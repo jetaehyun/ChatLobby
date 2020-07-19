@@ -8,6 +8,10 @@
 #include <signal.h>
 #include "Client/header/read_thread.h"
 
+#define SIZE 1024
+
+long long timestamp = 0;
+
 /**
  * @brief shorturl.at/dsN48
  *        - Catch Ctrl-C
@@ -38,56 +42,65 @@ int main(int argc, const char *argv[]) {
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock == -1) {
+        
         printf("Could not create socket...\n");
         return -1;
+
     }
    
     serv_addr.sin_family = AF_INET; 
     serv_addr.sin_port = htons(8800);
 
     if(argv[1] == NULL) serv_addr.sin_addr.s_addr = inet_addr("192.168.0.156");
-    else serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
+    else                serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
     
-     
-    // serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
-    bzero(&(serv_addr.sin_zero), 8);
-
     char *name = username();
 
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) < 0) { 
+        
         printf("Connection Failed\n"); 
         return -1; 
+        
     } 
 
     send(sock, name, sizeof(name), 0);
 
-    char *message = malloc(sizeof(char) * 1024);
+    char *message = malloc(sizeof(char) * SIZE);
     size_t msgSize = sizeof(message);
     pthread_t *thread = NULL;
 
     while(true) {
         // printf("sock: %d\n", sock);
         recv(sock, message, msgSize, 0);
+        
         if(strcmp(message, "deny") == 0) {
+
             printf("User already exists, try again...\n");
             auth = false;
             break;
+
         } else if(strcmp(message, "accept") == 0) {
+
             thread = allocateThread();
             create_thread(sockptr, thread);
             break;
+
         }
 
     }
     
     fflush(stdout);
-    
+
     while(auth) {
-        // for nowrecv(socket, buffer, 1024, 0)
+
         if(!feof(stdin)) {
+
             getline(&message, &msgSize, stdin);
+            printf("\n");
             if(strcmp(message, "exit()\n") == 0) break;
-            send(sock, message, 1024, 0);
+
+            send(sock, message, SIZE, 0);
+
         }
 
     }

@@ -7,9 +7,14 @@
 #include <string.h>
 #include <stdbool.h>
 #include "Server/header/connection_thread.h"
+#include "Server/header/control_thread.h"
 #include "linked_list.h"
 
 pthread_mutex_t searchLock; 
+
+void closeConnections(node_t *node) {
+
+}
 
 int main(int argc, const char *argv[]) {
 
@@ -22,12 +27,12 @@ int main(int argc, const char *argv[]) {
     printf("Creating socket...\n");
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     printf("Setting socket options..\n");
+
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
     
     address.sin_family = AF_INET;
     if(argv[1] == NULL) address.sin_addr.s_addr = inet_addr("192.168.0.156");
-    else address.sin_addr.s_addr = inet_addr(argv[1]);
-    // address.sin_addr.s_addr = INADDR_ANY;
+    else                address.sin_addr.s_addr = inet_addr(argv[1]);
     address.sin_port = htons(8800);
 
     printf("Binding socket to port 8800\n");
@@ -36,6 +41,7 @@ int main(int argc, const char *argv[]) {
     printf("Awaiting connections...\n");
     listen(server_fd, 10);
 
+    create_ctrl_thread();
     while(true) {
         int connection = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
         char *username = malloc(sizeof(username));
@@ -45,15 +51,20 @@ int main(int argc, const char *argv[]) {
 
         // simple auth check (compare plaintext) to see if that username exists in the lobby
         if(doesExist(&node, username)) {
+
             send(connection, "deny", 5, 0);
             close(connection);
+
         } else {
+
             send(connection, "accept", 7, 0);
             printf("Authorizing: %s\n", username);
-            create_thread(connection, username, &node);    
+            create_thread(connection, username, &node);  
+
         }
     }
 
+    
 
     return 0;    
 } 

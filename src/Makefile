@@ -11,6 +11,7 @@ SOURCES1 = \
 	connection_thread.c\
 	linked_list.c\
 	log.c\
+	control_thread.c\
 
 SOURCES2 = \
 	client.c\
