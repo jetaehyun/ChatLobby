@@ -8,3 +8,7 @@ A multithreaded server-client chat lobby programmed in C that utilizes TCP to al
 4. Run appropriate executable
    - server ```./server.exe```
    - client ```./client.exe```
+   
+## Compiling Server
+Hosting computer should provide a local ip address.
+   - ```./server.exe 192.168.xxx.xxx```
