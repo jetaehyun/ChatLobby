@@ -13,18 +13,31 @@ void *newConnection(void *ptr) {
         if(data > 0) {
             buffer[strlen(buffer)] = '\0'; 
             printf("%s\n", buffer);
-        }
+        } else break;
 
         usleep(500000);
     }
+
+    printf("Server has disconnected...\n");
     pthread_exit(NULL);
 
 }
 
+/**
+ * @brief Create a thread object
+ * 
+ * @param socket socket file descriptor 
+ * @param thread pointer to pthread_t obj
+ */
 void create_thread(int *socket, pthread_t *thread) {
     pthread_create(&threadT, NULL, newConnection, socket);
 }
 
+/**
+ * @brief malloc new pthread_t
+ * 
+ * @return pthread_t* 
+ */
 pthread_t *allocateThread() {
     return malloc(sizeof(pthread_t));
 }

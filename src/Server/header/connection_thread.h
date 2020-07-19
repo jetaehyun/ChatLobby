@@ -6,22 +6,22 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <time.h>
 #include <sys/socket.h>
 #include "../../linked_list.h"
+#include "log.h"
 
 struct user_t {
     pthread_t *thread;
     char* username;
-    int sock;
+    int socket;
     node_t **node;
 };
 
-void sendData(struct user_t userData, char *buffer);
-void closeIO(struct user_t userN);
+void broadcast(struct user_t userData, char *message);
+void alertStatus(bool isOnline, struct user_t userData);
+void closeIO(struct user_t userData);
 void *newConnection(void *ptr);
-void create_thread(int socket, char *name, node_t **nodeT);
-long long retrieveTime();
+void create_thread(int socket, char *username, node_t **nodeT);
 pthread_t *allocateThread();
 
 #endif

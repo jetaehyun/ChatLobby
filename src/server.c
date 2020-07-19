@@ -17,7 +17,7 @@ int main(int argc, const char *argv[]) {
 
     int server_fd, opt;
     struct sockaddr_in address;
-    int addrlen = sizeof(address);     
+    int addrlen = sizeof(address);
 
     printf("Creating socket...\n");
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -25,7 +25,8 @@ int main(int argc, const char *argv[]) {
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
     
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr("192.168.0.156");
+    if(argv[1] == NULL) address.sin_addr.s_addr = inet_addr("192.168.0.156");
+    else address.sin_addr.s_addr = inet_addr(argv[1]);
     // address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(8800);
 
@@ -38,10 +39,12 @@ int main(int argc, const char *argv[]) {
     while(true) {
         int connection = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
         char *username = malloc(sizeof(username));
+
         read(connection, username, sizeof(username));
         strtok(username, "\n");
 
-        if(doesExist(&node, username)) { // Check if user is in list
+        // simple auth check (compare plaintext) to see if that username exists in the lobby
+        if(doesExist(&node, username)) {
             send(connection, "deny", 5, 0);
             close(connection);
         } else {

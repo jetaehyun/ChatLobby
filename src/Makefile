@@ -10,6 +10,7 @@ SOURCES1 = \
 	server.c\
 	connection_thread.c\
 	linked_list.c\
+	log.c\
 
 SOURCES2 = \
 	client.c\

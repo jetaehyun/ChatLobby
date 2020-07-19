@@ -1,7 +1,9 @@
 #include "linked_list.h"
 
 /*
-    Linked List implementation for server messages
+    Linked List implementation for server messages only.
+    Could implement void type for modular use but not necessary
+    for this project.
 */
 
 
@@ -23,23 +25,19 @@ bool enqueue(node_t** list, int connection, char *username) {
 node_t *dequeue(node_t** list, char *username) {
     if(*list == NULL) return NULL;
 
-    node_t *node = (*list);
-    node_t *prev = NULL;
+    node_t *data = NULL;
 
-    while(node != NULL) {
-        if(strcmp(node->username, username) == 0) {
-            prev->next = node->next;
-            free(node);
-            return node;
-        } 
-        prev = node;
-        node = node->next;
-
+    while(*(list) != NULL) {
+        if(strcmp((*list)->username, username) == 0) {
+            data = (*list);
+            (*list) = data->next;
+            return data;
+        }
+        *(list) = (*list)->next;
     }
 
-    *list = (*list)->next;
-
     return NULL;
+
 }
 
 bool doesExist(node_t **list, char *username) {

@@ -30,7 +30,7 @@ char* username() {
 }
 
 int main(int argc, const char *argv[]) {
-    // signal(SIGINT, sigint_handler);
+    signal(SIGINT, sigint_handler);
     int sock = 0; 
     int *sockptr = &sock;
     struct sockaddr_in serv_addr; 
@@ -44,7 +44,11 @@ int main(int argc, const char *argv[]) {
    
     serv_addr.sin_family = AF_INET; 
     serv_addr.sin_port = htons(8800);
-    serv_addr.sin_addr.s_addr = inet_addr("192.168.0.156"); 
+
+    if(argv[1] == NULL) serv_addr.sin_addr.s_addr = inet_addr("192.168.0.156");
+    else serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
+    
+     
     // serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
     bzero(&(serv_addr.sin_zero), 8);
 
@@ -59,18 +63,18 @@ int main(int argc, const char *argv[]) {
 
     char *message = malloc(sizeof(char) * 1024);
     size_t msgSize = sizeof(message);
-    pthread_t *thr = NULL;
+    pthread_t *thread = NULL;
 
     while(true) {
-        printf("sock: %d\n", sock);
+        // printf("sock: %d\n", sock);
         recv(sock, message, msgSize, 0);
         if(strcmp(message, "deny") == 0) {
             printf("User already exists, try again...\n");
             auth = false;
             break;
         } else if(strcmp(message, "accept") == 0) {
-            thr = allocateThread();
-            create_thread(sockptr, thr);
+            thread = allocateThread();
+            create_thread(sockptr, thread);
             break;
         }
 
@@ -79,7 +83,7 @@ int main(int argc, const char *argv[]) {
     fflush(stdout);
     
     while(auth) {
-        // for now
+        // for nowrecv(socket, buffer, 1024, 0)
         if(!feof(stdin)) {
             getline(&message, &msgSize, stdin);
             if(strcmp(message, "exit()\n") == 0) break;
@@ -90,7 +94,7 @@ int main(int argc, const char *argv[]) {
 
     printf("\nEXITED CHAT\n");
     free(name);
-    free(thr);
+    free(thread);
     free(message);
     close(sock);
 

@@ -6,14 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * When we pass pointer as a parameter in a function and 
- * want update in the same pointer we use double pointer. 
- * On the other hand if we pass pointer as a parameter in a function and 
- * catch it in single pointer then will have to return the result to calling function back
- * in order to use the result.
- */
-
 typedef struct _node_t {
     struct _node_t *next;
     int connection;
