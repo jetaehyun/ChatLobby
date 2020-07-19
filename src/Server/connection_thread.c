@@ -85,4 +85,3 @@ long long retrieveTime() {
     time_t t = time(NULL);
     return t;
 }
-

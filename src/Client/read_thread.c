@@ -5,12 +5,15 @@ pthread_t threadT;
 void *newConnection(void *ptr) {
     int socket = *(int *)ptr;
     int data;
-    printf("Reading from socket: %d\n", socket);
+
     char buffer[1024] = {0};
     while(true) {
         data = recv(socket, buffer, 1024, 0);
-        printf("%d\n", data);
-        if(data > 0) printf("%s\n", buffer);
+        // printf("%d\n", data);
+        if(data > 0) {
+            buffer[strlen(buffer)] = '\0'; 
+            printf("%s\n", buffer);
+        }
 
         usleep(500000);
     }
@@ -18,8 +21,8 @@ void *newConnection(void *ptr) {
 
 }
 
-void create_thread(int socket, pthread_t *thread) {
-    pthread_create(&threadT, NULL, newConnection, &socket);
+void create_thread(int *socket, pthread_t *thread) {
+    pthread_create(&threadT, NULL, newConnection, socket);
 }
 
 pthread_t *allocateThread() {

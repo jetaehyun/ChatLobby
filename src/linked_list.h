@@ -28,4 +28,5 @@ void clear(node_t** list);
 void printList(node_t** list); // test
 int size(node_t** list);
 
+
 #endif

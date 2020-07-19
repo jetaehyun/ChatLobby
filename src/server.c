@@ -9,9 +9,10 @@
 #include "Server/header/connection_thread.h"
 #include "linked_list.h"
 
-#define datLen 1024
+pthread_mutex_t searchLock; 
 
 int main(int argc, const char *argv[]) {
+
     node_t *node = NULL;
 
     int server_fd, opt;
@@ -49,6 +50,7 @@ int main(int argc, const char *argv[]) {
             create_thread(connection, username, &node);    
         }
     }
+
 
     return 0;    
 } 
