@@ -8,21 +8,14 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include "../../linked_list.h"
+#include "communication.h"
 #include "log.h"
-
-struct user_t {
-    pthread_t *thread;
-    char* username;
-    int socket;
-    node_t **node;
-};
 
 void broadcast(struct user_t userData, char *message);
 void alertStatus(bool isOnline, struct user_t userData);
 void closeIO(struct user_t userData);
 void *newConnection(void *ptr);
 void create_thread(int socket, char *username, node_t **nodeT);
-long long getTime();
 pthread_t *allocateThread();
 
 #endif

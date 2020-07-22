@@ -25,7 +25,7 @@ void *newConnection(void *ptr) {
 
         data = recv(userData.socket, buffer, SIZE, 0);
 
-        if(data < 0) break;
+        if(data <= 0) break;
 
         if(data > 0 && currentUsers > 1 && !block) {
 
@@ -41,8 +41,10 @@ void *newConnection(void *ptr) {
                 continue;
 
             } else if(current_time - timeRef >= 2) {
+
                 timeRef = current_time;
                 messagesSent = 0;
+
             }
             messagesSent++;
 
@@ -62,39 +64,25 @@ void *newConnection(void *ptr) {
             memset(t, 0, sizeof(t));
 
         } else if(block) {
+            
+            // check to unblock
             current_time = getTime();
+
             if(current_time - timeRef >= 5) {
+
                 block = false;
                 timeRef = current_time;
                 messagesSent = 0;
+
             }
+
         }
 
         usleep(500000);         
     }
-
+    
     closeIO(userData);
     pthread_exit(NULL);
-}
-
-/**
- * @brief send msg to all open sockets
- * 
- * @param userData active user trying to send a msg
- * @param message string to send 
- */
-void broadcast(struct user_t userData, char *message) {
-    node_t *node = *(userData.node);    
-        
-    // Send to all users
-    while(node != NULL) {
-        // printf("\nconnection: %d\n", node->connection);
-        if(strcmp(node->username, userData.username) != 0) 
-            send(node->connection, message, SIZE, 0);
-        
-        node = node->next;
-    }
-
 }
 
 /**
@@ -146,41 +134,10 @@ void create_thread(int socket, char *username, node_t **nodeT) {
 }
 
 /**
- * @brief send a online/offline message to all other users
- * 
- * @param isOnline what message to send
- * @param userData user that has exited/entered
- */
-void alertStatus(bool isOnline, struct user_t userData) {
-    char msg[SIZE] = {'\0'};
-    char *statusMsg = NULL;
-
-    // determine status message
-    if(isOnline)  statusMsg = " has entered the chat...";
-    else          statusMsg = " has exited the chat...";
-    
-    // form message
-    strncat(msg, userData.username, strlen(userData.username));
-    strncat(msg, statusMsg, strlen(statusMsg));
-
-    // broadcast
-    broadcast(userData, msg);
-
-}
-
-/**
  * @brief malloc new pthread_t
  * 
  * @return pthread_t* 
  */
 pthread_t *allocateThread() {
     return malloc(sizeof(pthread_t));
-}
-
-long long getTime() {
-    time_t t;
-
-    t = time(NULL);
-    
-    return t;
 }

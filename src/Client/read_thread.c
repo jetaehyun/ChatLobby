@@ -15,7 +15,7 @@ void *newConnection(void *ptr) {
             buffer[strlen(buffer)] = '\0'; 
             printf("%s\n", buffer);
 
-        } else if(data < 0) break;
+        } else if(data <= 0) break;
 
         usleep(500000);
     }

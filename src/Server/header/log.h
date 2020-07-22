@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 void timestamp(char *buf);
+long long getTime();
 
 
 #endif

@@ -41,7 +41,8 @@ int main(int argc, const char *argv[]) {
     printf("Awaiting connections...\n");
     listen(server_fd, 10);
 
-    create_ctrl_thread();
+    create_ctrl_thread(&node);
+    
     while(true) {
         int connection = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
         char *username = malloc(sizeof(username));

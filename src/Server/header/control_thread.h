@@ -8,6 +8,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include "../../linked_list.h"
+#include "../header/communication.h"
+#include "../header/log.h"
 
 enum state {
     safe,
@@ -17,7 +20,7 @@ enum state {
 };
 
 void *ctrl_thread(void *ptr);
-void create_ctrl_thread();
+void create_ctrl_thread(node_t **nodeT);
 enum state setState(char *com);
 
 #endif

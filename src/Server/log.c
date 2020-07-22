@@ -17,3 +17,11 @@ void timestamp(char *buf) {
 
     // printf("Time: %s\n", buf);
 }
+
+long long getTime() {
+    time_t t;
+
+    t = time(NULL);
+    
+    return t;
+}

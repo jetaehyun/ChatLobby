@@ -25,20 +25,25 @@ void sigint_handler(int signum) { //Handler for SIGINT
 }
 
 char* username() {
+
     char* name = malloc(sizeof(char) * 50);
     size_t s = sizeof(name);
     printf("Enter your name: ");
     getline(&name, &s, stdin);
     printf("Entering lobby as: %s\n", name);
+
     return name;
 }
 
 int main(int argc, const char *argv[]) {
+
     signal(SIGINT, sigint_handler);
+
     int sock = 0; 
     int *sockptr = &sock;
     struct sockaddr_in serv_addr; 
     bool auth = true;
+    pthread_t *thread = NULL;
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock == -1) {
@@ -54,6 +59,7 @@ int main(int argc, const char *argv[]) {
     if(argv[1] == NULL) serv_addr.sin_addr.s_addr = inet_addr("192.168.0.156");
     else                serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
     
+    // Get username
     char *name = username();
 
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) < 0) { 
@@ -63,14 +69,15 @@ int main(int argc, const char *argv[]) {
         
     } 
 
+    // send connection request
     send(sock, name, sizeof(name), 0);
 
+    // for messages
     char *message = malloc(sizeof(char) * SIZE);
     size_t msgSize = sizeof(message);
-    pthread_t *thread = NULL;
 
     while(true) {
-        // printf("sock: %d\n", sock);
+        // check for approval from server, simple plaintext check
         recv(sock, message, msgSize, 0);
         
         if(strcmp(message, "deny") == 0) {
@@ -94,7 +101,8 @@ int main(int argc, const char *argv[]) {
     while(auth) {
 
         if(!feof(stdin)) {
-
+            
+            // Get user input and send
             getline(&message, &msgSize, stdin);
             printf("\n");
             if(strcmp(message, "exit()\n") == 0) break;
@@ -105,6 +113,7 @@ int main(int argc, const char *argv[]) {
 
     }
 
+    // close/free
     printf("\nEXITED CHAT\n");
     free(name);
     free(thread);
