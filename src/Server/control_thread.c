@@ -2,7 +2,7 @@
 #define SIZE 1024
 
 pthread_t control_thread_ptr;
-pthread_mutex_t commLock; 
+pthread_mutex_t ctrlLock; 
 
 void *ctrl_thread(void *ptr) {
     struct user_t userData = *(struct user_t *)ptr;
@@ -30,8 +30,8 @@ void *ctrl_thread(void *ptr) {
             continue;
 
         }
+        pthread_mutex_lock(&ctrlLock);
 
-        pthread_mutex_lock(&commLock);
         // execute power
         switch(s) {
             case cast:
@@ -40,12 +40,26 @@ void *ctrl_thread(void *ptr) {
                 broadcast(userData, message);
                 break;
             case kick:
-                printf("2");
-                s = -1;
+
+                if(userData.node == NULL) {
+                    printf("No users...\n");
+                    break;
+                }
+
+                getline(&buffer, &bufSize, stdin);
+                strtok(buffer, "\n");
+                node_t *user = dequeue(userData.node, buffer);
+                if(user != NULL) {
+                    free(user);
+                    printf("Kicking: %s\n", buffer);
+                } else printf("User does not exist\n");
+                
+
+                s = safe;
                 break;
-            case mute:
-                printf("3");
-                s = -1;
+            case list:
+                printList(userData.node);
+                s = safe;
                 break;
             case safe:
                 // simply observe
@@ -55,7 +69,8 @@ void *ctrl_thread(void *ptr) {
                 s = safe;
                 break;
         }
-        pthread_mutex_unlock(&commLock);
+        pthread_mutex_unlock(&ctrlLock);
+
     }
 }
 
@@ -69,7 +84,7 @@ enum state setState(char *com) {
 
     if     (strncmp("cast", com, 5) == 0) return cast;
     else if(strncmp("kick", com, 5) == 0) return kick;
-    else if(strncmp("mute", com, 5) == 0) return mute;
+    else if(strncmp("list", com, 5) == 0) return list;
     else if(strncmp("safe", com, 5) == 0) return safe;
 
     return -1;

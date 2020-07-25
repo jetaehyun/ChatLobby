@@ -16,7 +16,7 @@ enum state {
     safe,
     cast,
     kick,
-    mute
+    list
 };
 
 void *ctrl_thread(void *ptr);

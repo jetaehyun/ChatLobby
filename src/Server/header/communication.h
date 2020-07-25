@@ -16,7 +16,7 @@ struct user_t {
 };
 
 void broadcast(struct user_t userData, char *message);
-void alertStatus(bool isOnline, struct user_t userData);
+void alertStatus(bool isOnline, bool wasKicked, struct user_t userData);
 
 
 #endif

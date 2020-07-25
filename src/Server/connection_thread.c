@@ -8,6 +8,7 @@ pthread_mutex_t commLock;
 
 void *newConnection(void *ptr) {
     int data = 0;
+    bool wasKicked = false;
     struct user_t userData = *(struct user_t *)ptr;
 
     // Spam prevention
@@ -22,11 +23,19 @@ void *newConnection(void *ptr) {
     char t[12] = {'\0'};
 
     while(true) {
+        
+        // Check if user was kicked
+        if(isKicked(userData.node, userData.username)) {
+            wasKicked = true;
+            break;
+        }
 
         data = recv(userData.socket, buffer, SIZE, 0);
 
+        // No longer receiving data from client
         if(data <= 0) break;
 
+        // General msg
         if(data > 0 && currentUsers > 1 && !block) {
 
             // Keeps track of the number of messages received in the last 2 seconds...
@@ -81,7 +90,7 @@ void *newConnection(void *ptr) {
         usleep(500000);         
     }
     
-    closeIO(userData);
+    closeIO(userData, wasKicked);
     pthread_exit(NULL);
 }
 
@@ -90,15 +99,26 @@ void *newConnection(void *ptr) {
  * 
  * @param userData user that has exited
  */
-void closeIO(struct user_t userData) {
+void closeIO(struct user_t userData, bool wasKicked) {
     // adjust stats
     pthread_mutex_lock(&exitLock); 
     currentUsers--;
-    alertStatus(false, userData);
-    free(dequeue(userData.node, userData.username));
+
+    if(wasKicked) {
+
+        alertStatus(false, true, userData);
+        printf("Kicked %s...\n", userData.username);
+
+    } else {
+
+        alertStatus(false, false, userData);  
+        free(dequeue(userData.node, userData.username));
+        printf("%s disconnected\n", userData.username);
+
+    }
+
     pthread_mutex_unlock(&exitLock);
 
-    printf("%s disconnected\n", userData.username);
     close(userData.socket);
     free(userData.thread);
     free(userData.username);
@@ -123,7 +143,7 @@ void create_thread(int socket, char *username, node_t **nodeT) {
     // Add new user to list
     pthread_mutex_lock(&nodeLock);     
     enqueue(nodeT, socket, username);
-    alertStatus(true, newUser);
+    alertStatus(true, false, newUser);
     currentUsers++;
     pthread_mutex_unlock(&nodeLock);
 
@@ -131,6 +151,23 @@ void create_thread(int socket, char *username, node_t **nodeT) {
     pthread_create(newUser.thread, NULL, newConnection, &newUser);
     printf("\nUsers: %d\n\n", currentUsers);
 
+}
+
+/**
+ * @brief 
+ * 
+ * @param node 
+ * @param username 
+ * @return true 
+ * @return false 
+ */
+bool isKicked(node_t **node, char *username) {
+
+    if(!doesExist(node, username)) {
+        return true;
+    }
+
+    return false;
 }
 
 /**

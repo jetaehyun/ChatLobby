@@ -11,11 +11,10 @@
 #include "communication.h"
 #include "log.h"
 
-void broadcast(struct user_t userData, char *message);
-void alertStatus(bool isOnline, struct user_t userData);
-void closeIO(struct user_t userData);
+void closeIO(struct user_t userData, bool wasKicked);
 void *newConnection(void *ptr);
 void create_thread(int socket, char *username, node_t **nodeT);
 pthread_t *allocateThread();
+bool isKicked(node_t **node, char *username);
 
 #endif
