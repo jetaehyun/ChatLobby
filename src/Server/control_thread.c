@@ -7,6 +7,7 @@ pthread_mutex_t ctrlLock;
 void *ctrl_thread(void *ptr) {
     struct user_t userData = *(struct user_t *)ptr;
     enum state s = safe;
+    node_t *user = NULL;
 
     // msg stuff
     char *buffer = malloc(sizeof(char) * SIZE);
@@ -20,50 +21,52 @@ void *ctrl_thread(void *ptr) {
         strtok(buffer, "\n");
         
         // check to see if user wants access to admin controls
-        if(strncmp(buffer, "/change", 7) == 0) {
+        if(*(buffer) == '/') {
 
-            s = setState(&buffer[8]);
+            s = setState(buffer);
 
-            if(s == -1) printf("Requested control does not exist: cast, kick, mute, and safe\n");
-            else        printf("----Entering %s state----\n", &buffer[8]);
+            if(s == -1) continue;
             
-            continue;
-
         }
-        pthread_mutex_lock(&ctrlLock);
 
+        pthread_mutex_lock(&ctrlLock);
         // execute power
         switch(s) {
             case cast:
+
                 timestamp(t);
                 sprintf(message, "%sSERVER : %s", t, buffer);
                 broadcast(userData, message);
                 break;
-            case kick:
 
+            case kick:
                 if(userData.node == NULL) {
                     printf("No users...\n");
                     break;
                 }
 
-                getline(&buffer, &bufSize, stdin);
-                strtok(buffer, "\n");
-                node_t *user = dequeue(userData.node, buffer);
+                user = dequeue(userData.node, &buffer[6]);
+                
                 if(user != NULL) {
+
                     free(user);
-                    printf("Kicking: %s\n", buffer);
+                    user = NULL;
+
                 } else printf("User does not exist\n");
                 
-
                 s = safe;
                 break;
+
             case list:
+
                 printList(userData.node);
                 s = safe;
                 break;
+
             case safe:
                 // simply observe
                 break;
+
             default:
                 printf("Server is entering safe state...\n");
                 s = safe;
@@ -82,10 +85,20 @@ void *ctrl_thread(void *ptr) {
  */
 enum state setState(char *com) {
 
-    if     (strncmp("cast", com, 5) == 0) return cast;
-    else if(strncmp("kick", com, 5) == 0) return kick;
-    else if(strncmp("list", com, 5) == 0) return list;
-    else if(strncmp("safe", com, 5) == 0) return safe;
+    if     (strncmp("/cast", com, 5) == 0) return cast;
+    else if(strncmp("/kick", com, 5) == 0) {
+
+        if(strlen(com) < 7) {
+            printf("Missing 1 argument --> /kick [username]\n");
+            return -1;
+        }
+
+        return kick;
+    }
+    else if(strncmp("/list", com, 5) == 0) return list;
+    else if(strncmp("/safe", com, 5) == 0) return safe;
+
+    printf("Requested control does not exist: cast, kick, mute, and safe\n");
 
     return -1;
 }
@@ -94,12 +107,12 @@ enum state setState(char *com) {
 void create_ctrl_thread(node_t **nodeT) {
 
     // create new user_t obj
-    struct user_t newUser;
-    newUser.thread = &control_thread_ptr;
-    newUser.socket = -1;
-    newUser.username = "SERVER";
-    newUser.node = nodeT; 
+    struct user_t *newUser = malloc(sizeof(struct user_t));
+    newUser->thread = &control_thread_ptr;
+    newUser->socket = -1;
+    newUser->username = "SERVER";
+    newUser->node = nodeT; 
     
     // create thread and pass obj
-    pthread_create(&control_thread_ptr, NULL, ctrl_thread, &newUser);
+    pthread_create(&control_thread_ptr, NULL, ctrl_thread, newUser);
 }
