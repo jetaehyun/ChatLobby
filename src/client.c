@@ -37,7 +37,7 @@ char* username() {
 
 int main(int argc, const char *argv[]) {
 
-    signal(SIGINT, sigint_handler);
+    // signal(SIGINT, sigint_handler);
 
     int sock = 0; 
     int *sockptr = &sock;

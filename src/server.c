@@ -42,13 +42,18 @@ int main(int argc, const char *argv[]) {
     listen(server_fd, 10);
 
     create_ctrl_thread(&node);
-    
+    char con[1024] = {'\0'};
+
     while(true) {
         int connection = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-        char *username = malloc(sizeof(username));
 
-        read(connection, username, sizeof(username));
-        strtok(username, "\n");
+        if(read(connection, con, 1024) <= 0) continue;
+
+        strtok(con, "\n");
+
+        char *username = malloc(strlen(con) + 1);
+        strncpy(username, con, strlen(con) + 1);
+        username[strlen(con)] = '\0';
 
         // simple auth check (compare plaintext) to see if that username exists in the lobby
         if(doesExist(&node, username)) {

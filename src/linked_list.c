@@ -11,42 +11,58 @@ bool enqueue(node_t** list, int connection, char *username) {
 
     if(doesExist(list, username)) return false;
 
+    // create node
     node_t *node = malloc(sizeof(node_t));
-    node->username = username;
+    node->username = malloc(strlen(username) + 1);
+    strncpy(node->username, username, strlen(username) + 1);
+    node->username[strlen(username)] = '\0';
     node->connection = connection;
+    node->next = *list;
 
-    if(list == NULL) node->next = NULL;
-    else             node->next = *list;
-
+    // set node at head
     *list = node;
+
     return true;
 }
 
-node_t *dequeue(node_t** list, char *username) {
-    if(*list == NULL) return NULL;
+bool dequeue(node_t** list, char *username) {
 
-    node_t *data = NULL;
+    if(*list == NULL) return false;
 
-    while(*(list) != NULL) {
-        if(strcmp((*list)->username, username) == 0) {
-            data = (*list);
-            (*list) = data->next;
-            return data;
+    node_t *data = *list;
+    node_t *prev = *list;
+
+    if(data != NULL && strncmp(data->username, username, strlen(username)) == 0) {
+        *list = data->next;
+        free(data->username);
+        free(data);
+        return true;
+    }
+    
+    while(data != NULL) {
+
+        if(strncmp(data->username, username, strlen(username)) == 0) {
+            prev->next = data->next;
+            free(data->username);        
+            free(data);
+            return true;
         }
-        *(list) = (*list)->next;
+        
+        prev = data;
+        data = data->next;
     }
 
-    return NULL;
+    return false;
 
 }
 
 bool doesExist(node_t **list, char *username) {
-    if(list == NULL) return false;
+    if(*list == NULL) return false;
 
     node_t *node = *list;
 
     while(node != NULL) {
-        if(strcmp(node->username, username) == 0) return true;
+        if(strncmp(node->username, username, strlen(username)) == 0) return true;
         node = node->next;
     }
 
@@ -60,6 +76,7 @@ void clear(node_t** list) {
 
     while(node != NULL) {
         *list = (*list)->next;
+        free(node->username);
         free(node);
         node = *list;
     }

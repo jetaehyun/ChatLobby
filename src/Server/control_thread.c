@@ -7,7 +7,6 @@ pthread_mutex_t ctrlLock;
 void *ctrl_thread(void *ptr) {
     struct user_t userData = *(struct user_t *)ptr;
     enum state s = safe;
-    node_t *user = NULL;
 
     // msg stuff
     char *buffer = malloc(sizeof(char) * SIZE);
@@ -25,11 +24,11 @@ void *ctrl_thread(void *ptr) {
 
             s = setState(buffer);
 
-            if(s == -1) continue;
+            if(s == -1 || s == cast) continue;
             
         }
 
-        pthread_mutex_lock(&ctrlLock);
+        // pthread_mutex_lock(&ctrlLock);
         // execute power
         switch(s) {
             case cast:
@@ -40,19 +39,13 @@ void *ctrl_thread(void *ptr) {
                 break;
 
             case kick:
-                if(userData.node == NULL) {
+                if(*(userData.node) == NULL) {
                     printf("No users...\n");
+                    s = safe; // fix duplicate
                     break;
                 }
 
-                user = dequeue(userData.node, &buffer[6]);
-                
-                if(user != NULL) {
-
-                    free(user);
-                    user = NULL;
-
-                } else printf("User does not exist\n");
+                if(!dequeue(userData.node, &buffer[6])) printf("WARNING: User does not exist...");
                 
                 s = safe;
                 break;
@@ -72,9 +65,11 @@ void *ctrl_thread(void *ptr) {
                 s = safe;
                 break;
         }
-        pthread_mutex_unlock(&ctrlLock);
+        // pthread_mutex_unlock(&ctrlLock);
 
     }
+
+    // TODO: add close state
 }
 
 /**
@@ -106,13 +101,15 @@ enum state setState(char *com) {
 
 void create_ctrl_thread(node_t **nodeT) {
 
+    pthread_mutex_init(&ctrlLock, NULL);
+
     // create new user_t obj
-    struct user_t *newUser = malloc(sizeof(struct user_t));
-    newUser->thread = &control_thread_ptr;
-    newUser->socket = -1;
-    newUser->username = "SERVER";
-    newUser->node = nodeT; 
+    struct user_t *server = malloc(sizeof(struct user_t));
+    server->thread = &control_thread_ptr;
+    server->socket = -1;
+    server->username = "SERVER";
+    server->node = nodeT; 
     
     // create thread and pass obj
-    pthread_create(&control_thread_ptr, NULL, ctrl_thread, newUser);
+    pthread_create(&control_thread_ptr, NULL, ctrl_thread, server);
 }

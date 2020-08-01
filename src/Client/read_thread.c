@@ -21,7 +21,6 @@ void *newConnection(void *ptr) {
     }
 
     printf("Server has disconnected...\n");
-    pthread_exit(NULL);
 
 }
 

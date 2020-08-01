@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include "../../linked_list.h"
 #include "communication.h"
-#include "log.h"
+#include "log.h" 
 
 void closeIO(struct user_t userData, bool wasKicked);
 void *newConnection(void *ptr);

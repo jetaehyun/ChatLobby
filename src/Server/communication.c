@@ -14,7 +14,7 @@ void broadcast(struct user_t userData, char *message) {
     while(node != NULL) {
         
         // only send if it's not the sender
-        if(strcmp(node->username, userData.username) != 0) 
+        if(strncmp(node->username, userData.username, strlen(userData.username)) != 0) 
             send(node->connection, message, SIZE, 0);
         
         node = node->next;
