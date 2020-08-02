@@ -11,6 +11,7 @@
 #include "../../linked_list.h"
 #include "../header/communication.h"
 #include "../header/log.h"
+#include "locks.h"
 
 enum state {
     safe,

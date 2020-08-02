@@ -2,7 +2,6 @@
 #define SIZE 1024
 
 pthread_t control_thread_ptr;
-pthread_mutex_t ctrlLock; 
 
 void *ctrl_thread(void *ptr) {
     struct user_t userData = *(struct user_t *)ptr;
@@ -28,7 +27,7 @@ void *ctrl_thread(void *ptr) {
             
         }
 
-        // pthread_mutex_lock(&ctrlLock);
+        pthread_mutex_lock(&statsLock);
         // execute power
         switch(s) {
             case cast:
@@ -40,12 +39,15 @@ void *ctrl_thread(void *ptr) {
 
             case kick:
                 if(*(userData.node) == NULL) {
-                    printf("No users...\n");
-                    s = safe; // fix duplicate
-                    break;
-                }
 
-                if(!dequeue(userData.node, &buffer[6])) printf("WARNING: User does not exist...");
+                    printf("No users...\n");
+
+                } else {
+
+                    if(!dequeue(userData.node, &buffer[6])) 
+                        printf("WARNING: User does not exist...");
+
+                }
                 
                 s = safe;
                 break;
@@ -65,11 +67,12 @@ void *ctrl_thread(void *ptr) {
                 s = safe;
                 break;
         }
-        // pthread_mutex_unlock(&ctrlLock);
+        pthread_mutex_unlock(&statsLock);
 
     }
 
-    // TODO: add close state
+    pthread_exit(NULL);
+
 }
 
 /**
@@ -79,7 +82,8 @@ void *ctrl_thread(void *ptr) {
  * @return enum state cats, kick, mute, safe, or -1
  */
 enum state setState(char *com) {
-
+    
+    // find desired command
     if     (strncmp("/cast", com, 5) == 0) return cast;
     else if(strncmp("/kick", com, 5) == 0) {
 
@@ -100,8 +104,6 @@ enum state setState(char *com) {
 
 
 void create_ctrl_thread(node_t **nodeT) {
-
-    pthread_mutex_init(&ctrlLock, NULL);
 
     // create new user_t obj
     struct user_t *server = malloc(sizeof(struct user_t));

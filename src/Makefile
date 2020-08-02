@@ -4,7 +4,7 @@ build_dir = .build
 CC = gcc
 CFLAGS = -g -Wall
 LDFLAGS = -lpthread -pthread
-# INC_FLAGS = -I/Server/header
+INC_FLAGS = -I/Server/header
 
 SOURCES1 = \
 	server.c\
@@ -25,7 +25,7 @@ TARGET1 = server.exe
 TARGET2 = client.exe
 
 $(TARGET1) : $(OBJECTS1)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS1) -o $@
+	$(CC) $(CFLAGS) $(INC_FLAGS) $(LDFLAGS) $(OBJECTS1) -o $@
 
 $(TARGET2) : $(OBJECTS2)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS2) -o $@ 

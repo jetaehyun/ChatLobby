@@ -9,7 +9,7 @@ void *newConnection(void *ptr) {
     char buffer[1024] = {'\0'};
     while(true) {
         data = recv(socket, buffer, 1024, 0);
-        // printf("%d\n", data);
+
         if(data > 0) {
 
             buffer[strlen(buffer)] = '\0'; 
@@ -21,6 +21,7 @@ void *newConnection(void *ptr) {
     }
 
     printf("Server has disconnected...\n");
+    pthread_exit(NULL);
 
 }
 

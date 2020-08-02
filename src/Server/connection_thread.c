@@ -1,22 +1,16 @@
 #include "header/connection_thread.h"
-#define SIZE 1024
-
-// FIXME: mutex locks break the code
 
 int currentUsers = 0;
-// pthread_mutex_t statsLock = PTHREAD_MUTEX_INITIALIZER; 
-// pthread_mutex_t freeLock = PTHREAD_MUTEX_INITIALIZER;
-// pthread_mutex_t commLock = PTHREAD_MUTEX_INITIALIZER; 
 
 void *newConnection(void *ptr) {
     int data = 0;
-    bool wasKicked = false;
     struct user_t userData = *(struct user_t *)ptr;
 
     // Spam prevention
     long long timeRef = getTime();
     long long current_time = 0;
     int messagesSent = 0;
+    bool wasKicked = false;
     bool block = false;
 
     // buffers for message transmission
@@ -27,7 +21,7 @@ void *newConnection(void *ptr) {
     while(true) {         
 
         // Check if client is still there
-        if((data = read(userData.socket, buffer, SIZE)) <= 0) break;
+        if((data = recv(userData.socket, buffer, SIZE, 0)) <= 0) break;
 
         // Check if user was kicked
         if(isKicked(userData.node, userData.username)) {
@@ -49,7 +43,7 @@ void *newConnection(void *ptr) {
                 send(userData.socket, "Stop spamming the server...You've been block for 5 seconds", 1024, 0);
                 continue;
 
-            } else if(current_time - timeRef >= 2) {
+            } else if(current_time - timeRef >= 2) { // reset if they haven't spammed
 
                 timeRef = current_time;
                 messagesSent = 0;
@@ -67,9 +61,9 @@ void *newConnection(void *ptr) {
             printf("%s\n", message);
 
             // send message to open sockets
-            // pthread_mutex_lock(&commLock);
+            pthread_mutex_lock(&statsLock);
             broadcast(userData, message);
-            // pthread_mutex_unlock(&commLock);
+            pthread_mutex_unlock(&statsLock);
 
             memset(message, 0, sizeof(message));
             memset(t, 0, sizeof(t));
@@ -93,6 +87,8 @@ void *newConnection(void *ptr) {
     }
     
     closeIO(userData, wasKicked);
+    pthread_exit(NULL);
+
 }
 
 /**
@@ -103,7 +99,7 @@ void *newConnection(void *ptr) {
 void closeIO(struct user_t userData, bool wasKicked) {
 
     // adjust stats
-    pthread_mutex_lock(&freeLock); 
+    pthread_mutex_lock(&statsLock); 
     currentUsers--;
 
     if(wasKicked) {
@@ -119,7 +115,7 @@ void closeIO(struct user_t userData, bool wasKicked) {
 
     }
 
-    pthread_mutex_unlock(&freeLock);
+    pthread_mutex_unlock(&statsLock);
     close(userData.socket);
     free(userData.thread);
     free(userData.username);
@@ -144,11 +140,9 @@ void create_thread(int socket, char *username, node_t **nodeT) {
     newUser->node = nodeT;    
     
     // Add new user to list
-    // pthread_mutex_lock(&statsLock);     
     enqueue(nodeT, socket, username);
     alertStatus(true, false, *newUser);
     currentUsers++;
-    // pthread_mutex_unlock(&statsLock);
 
     // Make new thread
     pthread_create(newUser->thread, NULL, newConnection, newUser);
@@ -159,21 +153,21 @@ void create_thread(int socket, char *username, node_t **nodeT) {
 /**
  * @brief 
  * 
- * @param node 
- * @param username 
- * @return true 
- * @return false 
+ * @param node list to check
+ * @param username user to check
+ * @return true if they exist
+ * @return false if they don't exist
  */
 bool isKicked(node_t **node, char *username) {
-    // pthread_mutex_lock(&statsLock);
+    bool exist = false;
 
-    if(!doesExist(node, username)) {
-        return true;
-    }
+    pthread_mutex_lock(&statsLock);
 
-    // pthread_mutex_unlock(&statsLock);     
+    if(!doesExist(node, username)) exist = true;
 
-    return false;
+    pthread_mutex_unlock(&statsLock);     
+
+    return exist;
 }
 
 /**

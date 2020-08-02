@@ -8,17 +8,21 @@
 #include <stdbool.h>
 #include "Server/header/connection_thread.h"
 #include "Server/header/control_thread.h"
+#include "Server/header/locks.h"
 #include "linked_list.h"
 
-pthread_mutex_t searchLock; 
+pthread_mutex_t statsLock; 
 
-void closeConnections(node_t *node) {
+void initializeLocks() {
+
+    pthread_mutex_init(&statsLock, NULL);
 
 }
 
 int main(int argc, const char *argv[]) {
 
     node_t *node = NULL;
+    initializeLocks();
 
     int server_fd, opt;
     struct sockaddr_in address;
@@ -56,6 +60,7 @@ int main(int argc, const char *argv[]) {
         username[strlen(con)] = '\0';
 
         // simple auth check (compare plaintext) to see if that username exists in the lobby
+        pthread_mutex_lock(&statsLock);     
         if(doesExist(&node, username)) {
 
             send(connection, "deny", 5, 0);
@@ -68,9 +73,9 @@ int main(int argc, const char *argv[]) {
             create_thread(connection, username, &node);  
 
         }
-    }
+        pthread_mutex_unlock(&statsLock);     
 
-    
+    }
 
     return 0;    
 } 
